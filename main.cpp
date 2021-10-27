@@ -143,39 +143,43 @@ class ElementSecondary{
   double pos_y_;
   double width_;
   double height_;
-  //int node_ids[4];
+  int node_ids[4];
   double node_values_[4];;
-  ElementSecondary(double pos_x, double pos_y, double width, double height, double node_values, int node_ids){
+  ElementSecondary(double pos_x, double pos_y, double width, double height, double node_values[], int node_ids[]){
     pos_x_ = pos_x;
     pos_y_ = pos_y;
     width_ = width;
     height_ = height;
     //node_ids_ = node_ids
     for (int i = 0; i < 4; i++ ){
-      node_values_[i] = 101+i;
+      node_values_[i] = node_values[i];
     }
   };
   double valueAt(double x, double y){
+    // Normalization
     double a = (x - pos_x_) / (width_/2);
     double b = (y - pos_y_) / (height_/2);
+
+    // Shape functions
     double w1 = 0.25 * (1 - a) * (1 - b);
     double w2 = 0.25 * (1 + a) * (1 - b);
     double w3 = 0.25 * (1 + a) * (1 + b);
     double w4 = 0.25 * (1 - a) * (1 + b);
     return w1 * node_values_[0] + w2 * node_values_[1] + w3 * node_values_[2] + w4 * node_values_[3];
   }
-  
 };
 
 
 int main(){
-  PixelCenterGrid my_pixel_center_grid(3,2,1.0,1.0,101);
+  PixelCenterGrid my_pixel_center_grid(3, 2, 1.0, 1.0, 101);
   for (Element pixel_center : my_pixel_center_grid.pixels_){
     std::cout << "Pixel " << pixel_center.id_ << " at (" << pixel_center.pos_x_ << ", " << pixel_center.pos_y_ << ") has a value of " << pixel_center.value_ << "\n";
   }
 
   // Test a single element
-  ElementSecondary temp(1.0, 1.0, 4.0, 4.0, 0, 0);
+  int node_ids[4] = {101, 102, 103, 104};
+  double node_values[4] = {101, 102, 103, 105};
+  ElementSecondary temp(1.0, 1.0, 4.0, 4.0, node_values, node_ids);
   std::cout << temp.valueAt(1.0, 1.0) << std::endl;
   std::cout << temp.valueAt(3.0, 3.0) << std::endl;
 
