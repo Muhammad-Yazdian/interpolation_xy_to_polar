@@ -31,6 +31,31 @@
 #include <iostream>
 #include <string>
 
+class PointCartesian{
+ public:
+  double x_;
+  double y_;
+  PointCartesian();
+};
+
+class PointPolar{
+ public:
+  double r_;
+  double theta_;
+  PointPolar();
+};
+
+class Element{
+ public:
+  double width_;
+  double height_;
+  double value_;
+  Element();
+};
+
+PointCartesian ConvertPolarToCartesian(PointPolar p);
+int ConvertCartesianToElementNumber(PointCartesian p);
+
 int main()
 {
   std::cout << "Test"  << std::endl;
