@@ -47,7 +47,10 @@ class PointPolar{
  public:
   double r_;
   double theta_;
-  PointPolar();
+  PointPolar(double r, double theta){
+  double r_ = r;
+  double theta_ = theta;
+  }
 };
 
 class Element{
@@ -137,17 +140,40 @@ PointCartesian ConvertPolarToCartesian(PointPolar pp){
    return PointCartesian(pp.r_ * cos(pp.theta_), pp.r_ * sin(pp.theta_));
 }
 
-// Returns the element number of a given cartesian point p(x, y) with in a grid
-int FindElemetId();
+// Returns the element number of a given cartesian point p(x, y) within a grid
+int FindElementId(PointCartesian point, PixelCenterGrid grid){
+  int id;
+  int i = 0;
+  double min_distance, distance;
+  min_distance = grid.pixel_width_ + grid.pixel_height_;
+  int pixel_id;
+  for(auto p : grid.pixels_){
+    distance = pow(point.x_ - grid.pixels_[pixel_id].pos_x_, 2) + 
+               pow(point.y_ - grid.pixels_[pixel_id].pos_y_, 2);
+    if(distance < min_distance){
+      min_distance = distance;
+      id = i;
+    }
+    i++;
+  }
+  // for(int j; j < grid.n_pixels_y_; j++){
+  //   for(int i; i < grid.n_pixels_x_; i++){
+  //     pixel_id = j + i;
+  //     min_distance = pow(point.x_ - grid.pixels_[pixel_id].pos_x_, 2) + 
+  //                    pow(point.y_ - grid.pixels_[pixel_id].pos_y_, 2);
+  //   }
+  //}
+  return id;
+};
 
 template<typename T>
 // Find the value within an element by interpolation
-T FindValueAtCartesian(double x, double y, T temp_val){
+T FindValueAtCartesian(PointCartesian point, ElementSecondary element, T temp_val){
   // Test a single element
   int node_ids[4] = {101, 102, 103, 104};
   double node_values[4] = {101, 102, 103, 105};
-  ElementSecondary temp(1.0, 1.0, 4.0, 4.0, node_values, node_ids);
-  return temp.valueAt(x, y);
+  ElementSecondary test_element(1.0, 1.0, 4.0, 4.0, node_values, node_ids);
+  return test_element.valueAt(point.x_, point.y_);
 }
 
 int main(){
@@ -170,7 +196,15 @@ int main(){
   };
 
   //grid_elements = f(image)
-  //ConvertPolarToCartesian();
-  //FindElemetId(grid_elements, x,y)
-  FindValueAtCartesian(1.0, 1.0, 99);
+  double r = 1;
+  double theta = 1;
+  double arr1[] = {10, 20, 30, 40};
+  int arr2[] = {1, 2, 3, 4};
+  PointCartesian test_point_xy = ConvertPolarToCartesian(PointPolar(r, theta));
+  ElementSecondary test_element = ElementSecondary(1.0,1.0,1.0,1.0,arr1,arr2);
+  int id = FindElementId(test_point_xy, my_pixel_center_grid);
+
+  //double result = FindValueAtCartesian(test_point_xy, test_element, 99);
+  double result = FindValueAtCartesian(test_point_xy, my_pixel_center_grid.pixels_[id], 99);
+  std::cout << "The value at (r, theta) = (" << r << ", " << theta <<  ") is " << result << "\n";
 }
