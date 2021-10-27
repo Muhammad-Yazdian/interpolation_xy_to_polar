@@ -76,8 +76,8 @@ class Grid{
  public:
   int num_elements_x_;
   int num_elements_y_;
-  int element_width_;
-  int element_height_;
+  double element_width_;
+  double element_height_;
   double grid_base_value_;
   std::vector<Element> elements_;
   
@@ -121,7 +121,7 @@ PointCartesian ConvertPolarToCartesian(PointPolar p);
 int ConvertCartesianToElementNumber(PointCartesian p);
 
 int main(){
-  Grid my_grid(3,2,1,1,101);
+  Grid my_grid(3,2,1.0,1.0,101);
   for (Element e : my_grid.elements_){
     std::cout << e.id_ << " at (" << e.pos_x_ << ", " << e.pos_y_ << ") has a value of " << e.value_ << "\n";
   }
