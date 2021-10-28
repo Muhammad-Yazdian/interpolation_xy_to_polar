@@ -201,24 +201,28 @@ class InterpolatedGrid{
   };
   ~InterpolatedGrid(){};
 
-  // Returns the element number of a given cartesian point p(x, y) within the grid
+  // Returns the id of element containing the given point p(x, y)
+  // Returning zero means the point is outside of the grid (about 2 pixel size)
   int FindElementId(PointCartesian point){
     int id = 0;
-    int pixel_id = 0;
-    double distance; //TODO: Initialize this without loosing functionality
-    double min_distance = pixel_width_ + pixel_height_; // NOTE: Start from a large value
+    double distance = 0;
+    double min_distance = pixel_width_ + pixel_height_; // NOTE: This helps to initialize the variable with a large enough value
 
-    int i = 0;
+    int count = 0;
     for (auto element : elements_){
       distance = pow(point.x_ - element.x(), 2) +
                  pow(point.y_ - element.y(), 2);
       if (distance < min_distance){
         min_distance = distance;
-        id = i;
+        id = count;
       }
-      i++;
+      count++;
     }
     return id;
+  }
+
+  double FindValueAt(PointCartesian point){
+    return elements_[FindElementId(point)].ValueAt(point.x_, point.y_);
   }
 
  private:
@@ -281,9 +285,9 @@ int main(){
   PointCartesian test_point_xy = ConvertPolarToCartesian(test_point_ploar);
 
   // Results
-  int id = my_inter_grid.FindElementId(test_point_xy);
-  std::cout << "The point is on element #" << id << "\n";
-
-  double value = my_inter_grid.elements_[id].ValueAt(test_point_xy.x_, test_point_xy.y_);
+  //int id = my_inter_grid.FindElementId(test_point_xy);
+  //std::cout << "The point is on element #" << id << "\n";
+  //double value = my_inter_grid.elements_[id].ValueAt(test_point_xy.x_, test_point_xy.y_);
+  double value = my_inter_grid.FindValueAt(test_point_xy);
   std::cout << "The interpolated z value is " << value << "\n\n";
 }
