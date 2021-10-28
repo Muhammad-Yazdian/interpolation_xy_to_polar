@@ -118,6 +118,9 @@ class InterpolationElement{
     return w1 * node_values_[0] + w2 * node_values_[1] + 
            w3 * node_values_[2] + w4 * node_values_[3];
   }
+  
+  double x(){return pos_x_};
+  double y(){return pos_y_}
 
  private:
   double pos_x_;
@@ -160,6 +163,8 @@ class PixelGrid{
 
   double pixel_width(){return pixel_width_;}
   double pixel_height(){return pixel_height_;}
+  double n_pixels_x(){return n_pixels_x_;}
+  double n_pixels_y(){return n_pixels_y_;}
 
  private:
   int n_pixels_x_;
@@ -168,6 +173,52 @@ class PixelGrid{
   double pixel_height_;
   double grid_base_value_;
 };
+
+// Class constructing a 2D grid based on the interpolated elements
+class InterpolatedGrid{
+ public:
+  std::vector<InterpolationElement> elements_; // TODO(SMY): Better to move it to private and call a get function
+  
+  InterpolatedGrid(PixelGrid pixel_grid){
+    double pos_x = 0;
+    double pos_y = 0;
+    for (int row = 0; row < pixel_grid.n_pixels_y() - 1 ; row++){
+      for (int col = 0; col < pixel_grid.n_pixels_x() - 1 ; col++){
+        pos_x = (1 + col) * pixel_grid.pixel_width();
+        pos_y = (1 + row) * pixel_grid.pixel_height();
+        double node_values_array[4]={1,2,3,4}; //FIX: Fix
+        int node_ids_array[4]={1,2,3,4};      // FIX Fix 
+        elements_.push_back(InterpolationElement(
+                              pos_x, pos_y, 
+                              pixel_grid.pixel_width(), 
+                              pixel_grid.pixel_height(), 
+                              node_values_array, node_ids_array)); // TODO(SMY): Change the last arg. to an array
+      }
+    }
+  };
+  ~InterpolatedGrid(){};
+
+  // Returns the element number of a given cartesian point p(x, y) within the grid
+  int FindElementId(PointCartesian point){
+    int id = 0;
+    int pixel_id = 0;
+    double distance; //TODO: Initialize this without loosing functionality
+    double min_distance = grid.pixel_width_ + grid.pixel_height_; // NOTE: Start from a large value
+
+    int i = 0;
+    for (auto e : elements_){
+      distance = pow(point.x_ - e.[pixel_id].x(), 2) +
+                 pow(point.y_ - e.[pixel_id].y(), 2);
+      if (distance < min_distance){
+        min_distance = distance;
+        id = i;
+      }
+      i++;
+    }
+    return id;
+  };
+};
+
 
 // Converts polar coordinate (r, theta) to cartesian coordinate (x, y)
 PointCartesian ConvertPolarToCartesian(PointPolar pp){
@@ -209,8 +260,7 @@ int main(){
               << pixel.x() << ", " << pixel.y() 
               << ") has a value of " << pixel.value() << "\n";
   }
-
-
+  
   double arr1[] = {10, 20, 30, 40};
   int arr2[] = {1, 2, 3, 4};
 
@@ -219,6 +269,10 @@ int main(){
   double theta = 1;
   PointPolar test_point_ploar(r, theta);
   PointCartesian test_point_xy = ConvertPolarToCartesian(test_point_ploar);
+
+  InterpolatedGrid my_inter_grid;
+  
+  my_inter_grid.FindElementId(test_point_xy);
 
   // Find the element that contains the test point
   //my_pixel_center_grid
