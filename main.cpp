@@ -119,8 +119,8 @@ class InterpolationElement{
            w3 * node_values_[2] + w4 * node_values_[3];
   }
   
-  double x(){return pos_x_};
-  double y(){return pos_y_}
+  double x(){return pos_x_;}
+  double y(){return pos_y_;}
 
  private:
   double pos_x_;
@@ -180,6 +180,9 @@ class InterpolatedGrid{
   std::vector<InterpolationElement> elements_; // TODO(SMY): Better to move it to private and call a get function
   
   InterpolatedGrid(PixelGrid pixel_grid){
+    pixel_width_ = pixel_grid.pixel_width();
+    pixel_height_ = pixel_grid.pixel_height();
+
     double pos_x = 0;
     double pos_y = 0;
     for (int row = 0; row < pixel_grid.n_pixels_y() - 1 ; row++){
@@ -203,12 +206,12 @@ class InterpolatedGrid{
     int id = 0;
     int pixel_id = 0;
     double distance; //TODO: Initialize this without loosing functionality
-    double min_distance = grid.pixel_width_ + grid.pixel_height_; // NOTE: Start from a large value
+    double min_distance = pixel_width_ + pixel_height_; // NOTE: Start from a large value
 
     int i = 0;
-    for (auto e : elements_){
-      distance = pow(point.x_ - e.[pixel_id].x(), 2) +
-                 pow(point.y_ - e.[pixel_id].y(), 2);
+    for (auto element : elements_){
+      distance = pow(point.x_ - element.x(), 2) +
+                 pow(point.y_ - element.y(), 2);
       if (distance < min_distance){
         min_distance = distance;
         id = i;
@@ -216,7 +219,12 @@ class InterpolatedGrid{
       i++;
     }
     return id;
-  };
+  }
+
+ private:
+  double pixel_width_;
+  double pixel_height_;
+
 };
 
 
@@ -238,6 +246,8 @@ T FindValueAtCartesian(PointCartesian point, InterpolationElement element,
 
 int main(){
   // Load a image // TODO(SMY): Load an image
+
+  // Test image // TODO(SMY): test for (r,theta)=(1,1)
   double image[10][10] = {
       {1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0},
       {1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0},
@@ -253,6 +263,7 @@ int main(){
   
   // grid = f(image); // TODO(SMY): Convert image to a grid
 
+  // TODO: Separate a generic grid generator function from an image2grid convertor class/function
   PixelGrid my_pixel_grid(3, 2, 1.0, 1.0, 120); // TODO(SMY): Remove this after loading the image
   
   for (PixelElement pixel : my_pixel_grid.pixels_){
@@ -261,8 +272,7 @@ int main(){
               << ") has a value of " << pixel.value() << "\n";
   }
   
-  double arr1[] = {10, 20, 30, 40};
-  int arr2[] = {1, 2, 3, 4};
+  InterpolatedGrid my_inter_grid(my_pixel_grid);
 
   // Define a test point
   double r = 1;
@@ -270,17 +280,10 @@ int main(){
   PointPolar test_point_ploar(r, theta);
   PointCartesian test_point_xy = ConvertPolarToCartesian(test_point_ploar);
 
-  InterpolatedGrid my_inter_grid;
-  
-  my_inter_grid.FindElementId(test_point_xy);
+  // Results
+  int id = my_inter_grid.FindElementId(test_point_xy);
+  std::cout << "The point is on element #" << id << "\n";
 
-  // Find the element that contains the test point
-  //my_pixel_center_grid
-  //int element_id = grid.FindElementId(test_point_xy);
-
-  //InterpolationElement test_element = InterpolationElement(1.0, 1.0, 1.0, 1.0, arr1, arr2);
-  //double result = FindValueAtCartesian(test_point_xy, test_element, 99);
-  //double result = FindValueAtCartesian(test_point_xy, my_pixel_center_grid.pixels_[element_id], 99);
-  //std::cout << "The value at (r, theta) = (" << r << ", " << theta <<  ") is "
-  //          << result << "\n";
+  double value = my_inter_grid.elements_[id].ValueAt(test_point_xy.x_, test_point_xy.y_);
+  std::cout << "The interpolated z value is " << value << "\n\n";
 }
