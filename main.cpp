@@ -60,9 +60,9 @@ class PointPolar{
 };
 
 // Class constructing a pixel element. 
-class Element{
+class PixelElement{
  public:
-  Element(int id, double value, double pos_x, double pos_y, double width,
+  PixelElement(int id, double value, double pos_x, double pos_y, double width,
           double height, int adj_elements[]){
     id_ = id;
     value_ = value;
@@ -128,12 +128,12 @@ class InterpolationElement{
   double node_values_[4];
 };
 
-// Class constructing a vector of pixel elements in a 2D grid
-class PixelCenterGrid{
+// Class constructing a 2D grid based on the center of pixels
+class PixelGrid{
  public:
-  std::vector<Element> pixels_; // TODO(SMY): Better to move it to private and call a get function
+  std::vector<PixelElement> pixels_; // TODO(SMY): Better to move it to private and call a get function
   
-  PixelCenterGrid(int n_pixels_x, int n_pixels_y, 
+  PixelGrid(int n_pixels_x, int n_pixels_y, 
                   double pixel_width, double pixel_height, 
                   double grid_base_value){
     n_pixels_x_ = n_pixels_x;
@@ -148,7 +148,7 @@ class PixelCenterGrid{
       for (int col = 0; col < n_pixels_x_; col++){
         pos_x = pixel_width_ / 2 + col * pixel_width_;
         pos_y = pixel_height_ / 2 + row * pixel_height_;
-        pixels_.push_back(Element(col + n_pixels_x_ * row + 1, 
+        pixels_.push_back(PixelElement(col + n_pixels_x_ * row + 1, 
                                   grid_base_value_, 
                                   pos_x, pos_y, 
                                   pixel_width_, pixel_height_, 0));
@@ -156,7 +156,7 @@ class PixelCenterGrid{
       }
     }
   };
-  ~PixelCenterGrid(){};
+  ~PixelGrid(){};
 
   double pixel_width(){return pixel_width_;}
   double pixel_height(){return pixel_height_;}
@@ -202,13 +202,14 @@ int main(){
   
   // grid = f(image); // TODO(SMY): Convert image to a grid
 
-  PixelCenterGrid my_pixel_center_grid(3, 2, 1.0, 1.0, 120); // TODO(SMY): Remove this after loading the image
+  PixelGrid my_pixel_grid(3, 2, 1.0, 1.0, 120); // TODO(SMY): Remove this after loading the image
   
-  for (Element pixel_center : my_pixel_center_grid.pixels_){
-    std::cout << "Pixel " << pixel_center.id() << " at (" 
-              << pixel_center.x() << ", " << pixel_center.y() 
-              << ") has a value of " << pixel_center.value() << "\n";
+  for (PixelElement pixel : my_pixel_grid.pixels_){
+    std::cout << "Pixel " << pixel.id() << " at (" 
+              << pixel.x() << ", " << pixel.y() 
+              << ") has a value of " << pixel.value() << "\n";
   }
+
 
   double arr1[] = {10, 20, 30, 40};
   int arr2[] = {1, 2, 3, 4};
