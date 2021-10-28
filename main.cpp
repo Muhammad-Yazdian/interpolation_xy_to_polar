@@ -70,13 +70,14 @@ class Element{
     pos_y_= pos_y;
     width_ = width;
     height_ = height;
-    for(int i=0; i < 8; i++){adj_elements_[i] = adj_elements[i];}
+    //for(int i=0; i<8; i++){adj_elements_[i] = adj_elements[i];} //TODO(SMY): Set adj_elements_
   };
 
   int id() const {return id_;}
-  int x() const {return pos_x;}
-  int y() const {return pos_y;}
-  int adj_elements() const {return adj_elements_;}
+  int x() const {return pos_x_;}
+  int y() const {return pos_y_;}
+  double value() const {return value_;}
+  //int adj_elements() const {return adj_elements_;} // TODO(SMY): Match types
 
  private:
   int id_;
@@ -85,7 +86,7 @@ class Element{
   double pos_y_;
   double width_;
   double height_;
-  int adj_elements_[8]; // Conventional matrix notaion excluding #5 (see header comment 1.1)
+  int adj_elements_[8]; // From a 3x3 matrix excluding #5 (see header comment)
 };
 
 // Class constructing an interpolation element
@@ -98,7 +99,7 @@ class InterpolationElement{
     pos_y_ = pos_y;
     width_ = width;
     height_ = height;
-    for (int i = 0; i < 4; i++ ){
+    for (int i=0; i<4; i++){
       node_ids_[i] = node_ids[i];
       node_values_[i] = node_values[i];
     }
@@ -114,8 +115,8 @@ class InterpolationElement{
     double w2 = 0.25 * (1 + a) * (1 - b);
     double w3 = 0.25 * (1 + a) * (1 + b);
     double w4 = 0.25 * (1 - a) * (1 + b);
-    return w1 * node_values_[0] + w2 * node_values_[1] + w3 * node_values_[2] +
-           w4 * node_values_[3];
+    return w1 * node_values_[0] + w2 * node_values_[1] + 
+           w3 * node_values_[2] + w4 * node_values_[3];
   }
 
  private:
@@ -123,14 +124,14 @@ class InterpolationElement{
   double pos_y_;
   double width_;
   double height_;
-  int node_ids[4];
+  int node_ids_[4];
   double node_values_[4];
 };
 
 // Class constructing a vector of pixel elements in a 2D grid
 class PixelCenterGrid{
  public:
-  std::vector<Element> pixels_;
+  std::vector<Element> pixels_; // TODO(SMY): Better to move it to private and call a get function
   
   PixelCenterGrid(int n_pixels_x, int n_pixels_y, 
                   double pixel_width, double pixel_height, 
@@ -141,7 +142,8 @@ class PixelCenterGrid{
     pixel_height_ = pixel_height;
     grid_base_value_= grid_base_value;
     
-    double pos_x = pos_y = 0;
+    double pos_x = 0;
+    double pos_y = 0;
     for (int row = 0; row < n_pixels_y_; row++){
       for (int col = 0; col < n_pixels_x_; col++){
         pos_x = pixel_width_ / 2 + col * pixel_width_;
@@ -156,6 +158,9 @@ class PixelCenterGrid{
   };
   ~PixelCenterGrid(){};
 
+  double pixel_width(){return pixel_width_;}
+  double pixel_height(){return pixel_height_;}
+
  private:
   int n_pixels_x_;
   int n_pixels_y_;
@@ -169,32 +174,6 @@ PointCartesian ConvertPolarToCartesian(PointPolar pp){
    return PointCartesian(pp.r_ * cos(pp.theta_), pp.r_ * sin(pp.theta_));
 }
 
-// Returns the element number of a given cartesian point p(x, y) within a grid
-int FindElementId(PointCartesian point, PixelCenterGrid grid){
-  int id;
-  int i = 0;
-  double min_distance, distance;
-  min_distance = grid.pixel_width_ + grid.pixel_height_;
-  int pixel_id;
-  for(auto p : grid.pixels_){
-    distance = pow(point.x_ - grid.pixels_[pixel_id].pos_x_, 2) + 
-               pow(point.y_ - grid.pixels_[pixel_id].pos_y_, 2);
-    if(distance < min_distance){
-      min_distance = distance;
-      id = i;
-    }
-    i++;
-  }
-  // for(int j; j < grid.n_pixels_y_; j++){
-  //   for(int i; i < grid.n_pixels_x_; i++){
-  //     pixel_id = j + i;
-  //     min_distance = pow(point.x_ - grid.pixels_[pixel_id].pos_x_, 2) + 
-  //                    pow(point.y_ - grid.pixels_[pixel_id].pos_y_, 2);
-  //   }
-  //}
-  return id;
-};
-
 template<typename T>
 // Find the value within an element by interpolation
 T FindValueAtCartesian(PointCartesian point, InterpolationElement element, 
@@ -207,7 +186,7 @@ T FindValueAtCartesian(PointCartesian point, InterpolationElement element,
 }
 
 int main(){
-  // Load a image
+  // Load a image // TODO(SMY): Load an image
   double image[10][10] = {
       {1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0},
       {1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0},
@@ -220,18 +199,17 @@ int main(){
       {1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0},
       {1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0}
   };
+  
+  // grid = f(image); // TODO(SMY): Convert image to a grid
 
-  PixelCenterGrid my_pixel_center_grid(3, 2, 1.0, 1.0, 101);
-
+  PixelCenterGrid my_pixel_center_grid(3, 2, 1.0, 1.0, 120); // TODO(SMY): Remove this after loading the image
+  
   for (Element pixel_center : my_pixel_center_grid.pixels_){
-    std::cout << "Pixel " << pixel_center.id_ << " at (" 
-              << pixel_center.pos_x_ << ", " << pixel_center.pos_y_ 
-              << ") has a value of " << pixel_center.value_ << "\n";
+    std::cout << "Pixel " << pixel_center.id() << " at (" 
+              << pixel_center.x() << ", " << pixel_center.y() 
+              << ") has a value of " << pixel_center.value() << "\n";
   }
 
-
-  //grid_elements = f(image)
-  
   double arr1[] = {10, 20, 30, 40};
   int arr2[] = {1, 2, 3, 4};
 
@@ -242,12 +220,12 @@ int main(){
   PointCartesian test_point_xy = ConvertPolarToCartesian(test_point_ploar);
 
   // Find the element that contains the test point
-  int element_id = FindElementId(test_point_xy, my_pixel_center_grid);
+  //my_pixel_center_grid
+  //int element_id = grid.FindElementId(test_point_xy);
 
   //InterpolationElement test_element = InterpolationElement(1.0, 1.0, 1.0, 1.0, arr1, arr2);
   //double result = FindValueAtCartesian(test_point_xy, test_element, 99);
-  double result = FindValueAtCartesian(test_point_xy, 
-                  my_pixel_center_grid.pixels_[element_id], 99);
-  std::cout << "The value at (r, theta) = (" << r << ", " << theta <<  ") is "
-            << result << "\n";
+  //double result = FindValueAtCartesian(test_point_xy, my_pixel_center_grid.pixels_[element_id], 99);
+  //std::cout << "The value at (r, theta) = (" << r << ", " << theta <<  ") is "
+  //          << result << "\n";
 }
