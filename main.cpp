@@ -246,17 +246,16 @@ class InterpolatedGrid{
         node_values_array[1] = img_arr[i + 1];
         node_values_array[2] = img_arr[i + n_pixels_x + 1];
         node_values_array[3] = img_arr[i + n_pixels_x];
-        node_ids_array[0] = 0;
-        node_ids_array[1] = 1;
-        node_ids_array[2] = 2;
-        node_ids_array[3] = 3;
+        node_ids_array[0] = i;
+        node_ids_array[1] = i + 1;
+        node_ids_array[2] = i + n_pixels_x + 1;
+        node_ids_array[3] = i + n_pixels_x;
         elements_.push_back(InterpolationElement(pos_x,
                                                  pos_y,
                                                  pixel_width_,
                                                  pixel_height_,
                                                  node_values_array,
                                                  node_ids_array));
-        // TODO(SMY): Change the last arg. to an array
       }
     }
   }
@@ -314,8 +313,10 @@ T FindValueAtCartesian(PointCartesian point,
 }
 
 int main(){
-  // TODO(SMY): Load image file and convert it to grid
-  // Test image
+  // TODO(SMY): Load image file and convert it to an array of use 
+  // load file constructor
+
+  // Test image 2D Array
   double image[10][10] = {
       {1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0},
       {1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0},
@@ -329,6 +330,7 @@ int main(){
       {1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0}
   };
 
+  // Test image 1D Array
   int image2_n_pixels_x = 10;
   int image2_n_pixels_y = 10;
   double image2_pixel_width = 1;
@@ -346,46 +348,31 @@ int main(){
       1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0
   };
 
-  InterpolatedGrid my_inter_grid_2(image2, 
-                                   image2_n_pixels_x, 
-                                   image2_n_pixels_y,
-                                   image2_pixel_width,
-                                   image2_pixel_height);
-
-  // TODO(SMY): Separate a generic grid generator function from an image2grid 
-  // convertor class/function
-  PixelGrid my_pixel_grid(3, 2, 1.0, 1.0, 120); // TODO(SMY): Use actual data
-  
-  for (PixelElement pixel : my_pixel_grid.pixels_){
-    std::cout << "Pixel " << pixel.id() << " at (" 
-              << pixel.x() << ", " << pixel.y() 
-              << ") has a value of " << pixel.value() << "\n";
-  }
-
-  InterpolatedGrid my_inter_grid(my_pixel_grid);
-
+  InterpolatedGrid my_inter_grid(image2, 
+                                 image2_n_pixels_x, 
+                                 image2_n_pixels_y,
+                                 image2_pixel_width,
+                                 image2_pixel_height);
 
   // Define a test point
-  double r = 1.1;
-  double theta = 0.2;
-  PointPolar test_point_ploar(r, theta);
-  PointCartesian test_point_xy = ConvertPolarToCartesian(test_point_ploar);
-
-  // Results
-  int id = my_inter_grid.FindElementId(test_point_xy);
-  std::cout << "The point is on element #" << id << "\n";
-  //double value = my_inter_grid.elements_[id].ValueAt(test_point_xy.x_, test_point_xy.y_);
-  double value = my_inter_grid.FindValueAt(test_point_xy);
-  std::cout << "The interpolated z value is " << value << "\n\n";
-
-  // Define another test point
-  r = 2.1;
-  theta = 0.2;
-  PointCartesian test_point_xy2 = ConvertPolarToCartesian(PointPolar(r, theta));
-
-  // Results
-  id = my_inter_grid.FindElementId(test_point_xy2);
-  std::cout << "The point is on element #" << id << "\n";
-  value = my_inter_grid.FindValueAt(test_point_xy2);
-  std::cout << "The interpolated z value is " << value << "\n\n";
+  PointPolar test_point_ploar(0.0, 0.0);
+  PointCartesian test_point_xy(0.0, 0.0);
+  
+  double r = 5.0;
+  double theta = 0;
+  int id = 0;
+  double value = 0;
+  for (theta = 0; theta < 1.5; theta = theta + 0.05){
+    test_point_ploar = PointPolar(r, theta);
+    test_point_xy = ConvertPolarToCartesian(test_point_ploar);
+    id = my_inter_grid.FindElementId(test_point_xy);
+    value = my_inter_grid.FindValueAt(test_point_xy);
+    
+    // Results
+    std::cout << "Point (x, y)=(" 
+              << test_point_xy.x_ << ", " 
+              << test_point_xy.y_ << ") " 
+              << "is on element #" << id
+              << ". The interpolated z value is " << value << ".\n\n";
+  }
 }
