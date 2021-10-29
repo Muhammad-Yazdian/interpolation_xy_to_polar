@@ -2,8 +2,12 @@
 This code converts a 2D discrete function from Cartesian representation to Polar one using node interpolation.
 
 # 2021-10-29, 15:13 Code Tested
-## Input
-10 by 10 grid with unit pixel size and unit step at x=5.0
+## Inputs
+1) 10 by 10 grid with unit pixel size and unit step at x = 5.0
+2) /theta from 0 to 1.5 rad by 0.05 steps
+3) r = 5
+
+Grid:
 ```
  {1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0,
   1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0,
