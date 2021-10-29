@@ -1,9 +1,9 @@
 # interpolation_xy_to_polar
 This code converts a 2D discrete function from Cartesian representation to Polar one using node interpolation.
 
-# 2021-10-29, 15:13 Code tested
+# 2021-10-29, 15:13 Code Tested
 ## Input
-10 by 10 unit pixel size with unit step at x=5.0
+10 by 10 grid with unit pixel size and unit step at x=5.0
 ```
  {1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0,
   1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0,
