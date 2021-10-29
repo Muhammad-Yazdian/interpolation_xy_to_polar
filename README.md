@@ -4,6 +4,7 @@ This code converts a 2D discrete function from Cartesian representation to Polar
 # 2021-10-29, 15:13 Code tested
 ## Input
 10 by 10 unit pixel size with unit step at x=5.0
+```
  {1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0,
   1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0,
   1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0,
@@ -14,8 +15,10 @@ This code converts a 2D discrete function from Cartesian representation to Polar
   1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0,
   1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0,
   1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0}
+```
 
 ## Output
+```
 Point (x, y)=(5, 0) is on element #4. The interpolated z value is 0.5.
 Point (x, y)=(4.99375, 0.249896) is on element #4. The interpolated z value is 0.506249.
 Point (x, y)=(4.97502, 0.499167) is on element #4. The interpolated z value is 0.524979.
@@ -46,4 +49,4 @@ Point (x, y)=(1.33749, 4.81779) is on element #36. The interpolated z value is 1
 Point (x, y)=(1.09503, 4.87862) is on element #36. The interpolated z value is 1.
 Point (x, y)=(0.849836, 4.92725) is on element #36. The interpolated z value is 1.
 Point (x, y)=(0.602514, 4.96356) is on element #36. The interpolated z value is 1.
-
+```
