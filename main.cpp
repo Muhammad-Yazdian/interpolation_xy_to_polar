@@ -56,6 +56,7 @@ class PointPolar{
 };
 
 // Class constructing a pixel element. 
+/* REMOVE(SMY): PixelElement is not useful.
 class PixelElement{
  public:
   PixelElement(int id, 
@@ -72,7 +73,7 @@ class PixelElement{
       width_(width),
       height_(height)
   {
-    //TODO(SMY): Set adj_elements_
+    //Set adj_elements_
     //for(int i=0; i<8; i++){adj_elements_[i] = adj_elements[i];} 
   }
 
@@ -80,7 +81,7 @@ class PixelElement{
   int x() const {return pos_x_;}
   int y() const {return pos_y_;}
   double value() const {return value_;}
-  // TODO(SMY): Match types
+  // Match types
   //int adj_elements() const {return adj_elements_;} 
 
  private:
@@ -92,6 +93,7 @@ class PixelElement{
   double height_;
   int adj_elements_[8]; // From a 3x3 matrix excluding #5 (see header comment)
 };
+*/
 
 // Class constructing an interpolation element
 class InterpolationElement{
@@ -143,9 +145,10 @@ class InterpolationElement{
 };
 
 // Class constructing a 2D grid based on the center of pixels
+/* REMOVE(SMY): PixelGrid is not useful.
 class PixelGrid{
  public:
-  // TODO(SMY): Better to move it to private and call a get function
+  // Better to move it to private and call a get function
   std::vector<PixelElement> pixels_; 
   
   PixelGrid(int n_pixels_x, 
@@ -172,7 +175,7 @@ class PixelGrid{
                                        pixel_width_, 
                                        pixel_height_, 
                                        0));
-        // TODO(SMY): Change the last arg. to an array
+        // Change the last arg. to an array
       }
     }
   };
@@ -190,39 +193,11 @@ class PixelGrid{
   double pixel_height_;
   double grid_base_value_;
 };
+*/
 
 // Class constructing a 2D grid based on the interpolated elements
 class InterpolatedGrid{
  public:
-  // TODO(SMY): Better to move it to private and call a get function
-  std::vector<InterpolationElement> elements_; 
-  // Create an interpolated grid form a pixel grid
-  InterpolatedGrid(PixelGrid pixel_grid)
-    : pixel_width_(pixel_grid.pixel_width()),
-      pixel_height_(pixel_grid.pixel_height())
-  {
-    double pos_x = 0;
-    double pos_y = 0;
-    for (int row = 0; row < pixel_grid.n_pixels_y() - 1 ; row++){
-      for (int col = 0; col < pixel_grid.n_pixels_x() - 1 ; col++){
-        pos_x = (1 + col) * pixel_width_;
-        pos_y = (1 + row) * pixel_height_;
-        double node_values_array[4]={1,2,3,4}; //FIX: Use actual values
-        int node_ids_array[4]={1,2,3,4};      // FIX: Use actual values
-        elements_.push_back(InterpolationElement(pos_x, 
-                                                 pos_y, 
-                                                 pixel_width_, 
-                                                 pixel_height_, 
-                                                 node_values_array, 
-                                                 node_ids_array)); 
-        // TODO(SMY): Change the last arg. to an array
-      }
-    }
-  }
-  
-  // Create an interpolated grid form a file
-  // InterpolatedGrid(file) //TODO: Create grid form a text file
-
   // Create an interpolated grid form an array
   InterpolatedGrid(double img_arr[],
                    int n_pixels_x,
@@ -259,6 +234,35 @@ class InterpolatedGrid{
       }
     }
   }
+
+  // Create an interpolated grid form a file
+  // InterpolatedGrid(file) //TODO: Create grid form a text file
+
+  /* REMOVE(SMY): Pixel grid is not useful.
+  // Create an interpolated grid form a pixel grid
+  InterpolatedGrid(PixelGrid pixel_grid)
+    : pixel_width_(pixel_grid.pixel_width()),
+      pixel_height_(pixel_grid.pixel_height())
+  {
+    double pos_x = 0;
+    double pos_y = 0;
+    for (int row = 0; row < pixel_grid.n_pixels_y() - 1 ; row++){
+      for (int col = 0; col < pixel_grid.n_pixels_x() - 1 ; col++){
+        pos_x = (1 + col) * pixel_width_;
+        pos_y = (1 + row) * pixel_height_;
+        double node_values_array[4]={1,2,3,4}; //FIX: Use actual values
+        int node_ids_array[4]={1,2,3,4};      // FIX: Use actual values
+        elements_.push_back(InterpolationElement(pos_x, 
+                                                 pos_y, 
+                                                 pixel_width_, 
+                                                 pixel_height_, 
+                                                 node_values_array, 
+                                                 node_ids_array)); 
+        // Change the last arg. to an array
+      }
+    }
+  }
+  */
   ~InterpolatedGrid(){};
 
   // Returns the id of element containing the given point p(x, y)
@@ -283,14 +287,20 @@ class InterpolatedGrid{
     return id;
   }
 
-  // TODO: Use a template to support generic output type (see below)
   double FindValueAt(PointCartesian point){
+    return elements_[FindElementId(point)].ValueAt(point.x_, point.y_);
+  }
+
+  template <typename T>
+  T FindGenericValueAt(PointCartesian point){
+    // TODO: Use a template to support generic output value
     return elements_[FindElementId(point)].ValueAt(point.x_, point.y_);
   }
 
  private:
   double pixel_width_;
   double pixel_height_;
+  std::vector<InterpolationElement> elements_; 
 };
 
 // Converts polar coordinate (r, theta) to cartesian coordinate (x, y)
@@ -366,7 +376,8 @@ int main(){
     test_point_ploar = PointPolar(r, theta);
     test_point_xy = ConvertPolarToCartesian(test_point_ploar);
     id = my_inter_grid.FindElementId(test_point_xy);
-    value = my_inter_grid.FindValueAt(test_point_xy);
+    //value = my_inter_grid.FindValueAt(test_point_xy);
+    value = my_inter_grid.FindGenericValueAt<double>(test_point_xy);
     
     // Results
     std::cout << "Point (x, y)=(" 
