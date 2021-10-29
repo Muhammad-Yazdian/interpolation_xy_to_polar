@@ -29,6 +29,7 @@
  *                                               b
  *    E1: 1, 2, 6, 5  
  *    E2: 2, 3, 7, 6
+ *    Ei: i, i+1, i+1+n_x, i+n_x 
  * 
  **/
 
@@ -195,7 +196,7 @@ class InterpolatedGrid{
  public:
   // TODO(SMY): Better to move it to private and call a get function
   std::vector<InterpolationElement> elements_; 
-  
+  // Create an interpolated grid form a pixel grid
   InterpolatedGrid(PixelGrid pixel_grid)
     : pixel_width_(pixel_grid.pixel_width()),
       pixel_height_(pixel_grid.pixel_height())
@@ -204,20 +205,61 @@ class InterpolatedGrid{
     double pos_y = 0;
     for (int row = 0; row < pixel_grid.n_pixels_y() - 1 ; row++){
       for (int col = 0; col < pixel_grid.n_pixels_x() - 1 ; col++){
-        pos_x = (1 + col) * pixel_grid.pixel_width();
-        pos_y = (1 + row) * pixel_grid.pixel_height();
+        pos_x = (1 + col) * pixel_width_;
+        pos_y = (1 + row) * pixel_height_;
         double node_values_array[4]={1,2,3,4}; //FIX: Use actual values
         int node_ids_array[4]={1,2,3,4};      // FIX: Use actual values
         elements_.push_back(InterpolationElement(pos_x, 
                                                  pos_y, 
-                                                 pixel_grid.pixel_width(), 
-                                                 pixel_grid.pixel_height(), 
+                                                 pixel_width_, 
+                                                 pixel_height_, 
                                                  node_values_array, 
                                                  node_ids_array)); 
         // TODO(SMY): Change the last arg. to an array
       }
     }
-  };
+  }
+  
+  // Create an interpolated grid form a file
+  // InterpolatedGrid(file) //TODO: Create grid form a text file
+
+  // Create an interpolated grid form an array
+  InterpolatedGrid(double img_arr[],
+                   int n_pixels_x,
+                   int n_pixels_y, 
+                   double pixel_width, 
+                   double pixel_height)
+    :  pixel_width_(pixel_width),
+       pixel_height_(pixel_height)
+  {
+    double pos_x = 0;
+    double pos_y = 0;
+    double node_values_array[4];
+    int node_ids_array[4];
+    int i = 0;
+    for (int row = 0; row < n_pixels_y - 1 ; row++){
+      for (int col = 0; col < n_pixels_x - 1 ; col++){
+        pos_x = (1 + col) * pixel_width_;
+        pos_y = (1 + row) * pixel_height_;
+        i = row * n_pixels_x + col;
+        node_values_array[0] = img_arr[i];
+        node_values_array[1] = img_arr[i + 1];
+        node_values_array[2] = img_arr[i + n_pixels_x + 1];
+        node_values_array[3] = img_arr[i + n_pixels_x];
+        node_ids_array[0] = 0;
+        node_ids_array[1] = 1;
+        node_ids_array[2] = 2;
+        node_ids_array[3] = 3;
+        elements_.push_back(InterpolationElement(pos_x,
+                                                 pos_y,
+                                                 pixel_width_,
+                                                 pixel_height_,
+                                                 node_values_array,
+                                                 node_ids_array));
+        // TODO(SMY): Change the last arg. to an array
+      }
+    }
+  }
   ~InterpolatedGrid(){};
 
   // Returns the id of element containing the given point p(x, y)
@@ -286,7 +328,30 @@ int main(){
       {1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0},
       {1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0}
   };
-  
+
+  int image2_n_pixels_x = 10;
+  int image2_n_pixels_y = 10;
+  double image2_pixel_width = 1;
+  double image2_pixel_height = 1;
+  double image2[100] = {
+      1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0
+  };
+
+  InterpolatedGrid my_inter_grid_2(image2, 
+                                   image2_n_pixels_x, 
+                                   image2_n_pixels_y,
+                                   image2_pixel_width,
+                                   image2_pixel_height);
+
   // TODO(SMY): Separate a generic grid generator function from an image2grid 
   // convertor class/function
   PixelGrid my_pixel_grid(3, 2, 1.0, 1.0, 120); // TODO(SMY): Use actual data
@@ -296,8 +361,9 @@ int main(){
               << pixel.x() << ", " << pixel.y() 
               << ") has a value of " << pixel.value() << "\n";
   }
-  
+
   InterpolatedGrid my_inter_grid(my_pixel_grid);
+
 
   // Define a test point
   double r = 1.1;
